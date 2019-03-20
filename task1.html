@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Phoenix interactive 3D data visualization</title>
+<style>
+.info 
+{
+color:white;
+position: absolute;
+top: 10px;
+width: 100%;
+text-align: center;
+z-index: 100;
+display:block;
+}
+</style>
+</head>
+<body>
+<script src="three.js-master/build/three.js"></script>
+<script src="three.js-master/examples/js/loaders/OBJLoader.js"></script>
+<script>
+var scene = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+var renderer = new THREE.WebGLRenderer();
+var raycaster = new THREE.Raycaster();
+var object = new THREE.Group();
+var mouse = new THREE.Vector2();
+var keyLight = new THREE.DirectionalLight(new THREE.Color('hsl(30, 100%, 75%)'), 1.0);
+var fillLight = new THREE.DirectionalLight(new THREE.Color('hsl(240, 100%, 75%)'), 0.75);
+var backLight = new THREE.DirectionalLight(0xffffff, 1.0);
+
+renderer.setSize( window.innerWidth, window.innerHeight );
+document.body.appendChild( renderer.domElement );
+camera.position.z = 1000;
+keyLight.position.set(-100, 0, 100);
+fillLight.position.set(100, 0, 100);
+backLight.position.set(100, 0, -100).normalize();
+scene.add(keyLight);
+scene.add(fillLight);
+scene.add(backLight);
+var loader = new THREE.OBJLoader();
+loader.load("Pix.obj",function ( obj ) {
+object=obj;
+scene.add( object );
+render();
+},
+function ( xhr ) {
+console.log( ( xhr.loaded / xhr.total * 100 )+'% loaded' );
+},
+function ( error ) {
+console.log('error happened')
+}
+);
+var render = function () {
+requestAnimationFrame(render);
+object.rotation.y += 0.01;
+window.addEventListener( 'click', raycast, true);
+renderer.render( scene, camera );
+};
+function raycast(e)
+{
+mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1;
+mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
+raycaster.setFromCamera( mouse, camera );    
+var intersects = raycaster.intersectObjects( scene.children,true );
+for ( var i = 0; i < intersects.length; i++ ) {
+intersects[ i ].object.material.color.set( 0xff0000 );
+ 
+}
+var text=document.getElementById("text");
+text.innerHTML=text.innerHTML+" \n(world's largest and most powerful particle accelerator)";
+
+}
+</script>
+<div id="text" class="info">The Large Hadron Collider</div>
+</body>
+</html>
